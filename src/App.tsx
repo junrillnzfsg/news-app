@@ -1,25 +1,71 @@
-import React, { SyntheticEvent } from 'react'
+import React, { ChangeEvent, SyntheticEvent, useState } from 'react'
 import { Container, DropdownProps, Grid, Input } from 'semantic-ui-react'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from './rootReducer'
-
 import Select from './components/Select'
 import countryOptions from './data/countryOptions'
 import newsCategory from './data/newsCategory'
 import SearchResultsMessage from './components/SearchResultsMessage'
 import Article from './components/Article'
-import { fetchTopHeadlines } from './reducers/newsReducer'
+import {
+    fetchSearchEverything,
+    fetchTopHeadlines,
+} from './reducers/newsReducer'
+import { SEARCH_CATEGORY } from './constants'
+import toast from './lib/toast'
 
 function App() {
     const dispatch = useDispatch()
+    let searchTimeout: number | null = null
+    const [category, setCategory] = useState(SEARCH_CATEGORY.TOP_HEADLINES)
+    const [country, setCountry] = useState('')
     const { articles } = useSelector((state: RootState) => state.news)
+
     const handleCountryChange = (
         e: SyntheticEvent,
         formValue: DropdownProps
     ) => {
         const value = formValue.value || ''
-        dispatch(fetchTopHeadlines(value.toString()))
+        setCountry(value.toString())
+        if (category === SEARCH_CATEGORY.TOP_HEADLINES)
+            dispatch(fetchTopHeadlines(value.toString()))
+        else
+            toast.warn(
+                'To retrieve articles by country "Top Headlines" should be selected',
+                {
+                    position: toast.POSITION.TOP_RIGHT,
+                }
+            )
     }
+
+    const handleSearchCategory = (
+        e: SyntheticEvent,
+        formValue: DropdownProps
+    ) => {
+        const value = formValue.value || ''
+        setCategory(value.toString())
+        if (value.toString() === SEARCH_CATEGORY.TOP_HEADLINES && country)
+            dispatch(fetchTopHeadlines(country))
+    }
+
+    const handleSearchInput = (e: ChangeEvent<HTMLInputElement>) => {
+        e.persist()
+        if (searchTimeout) clearTimeout(searchTimeout)
+        // @ts-ignore
+        searchTimeout = setTimeout(() => {
+            if (category === SEARCH_CATEGORY.EVERYTHING) {
+                dispatch(fetchSearchEverything(e.target.value))
+            } else {
+                toast.warn(
+                    'To search articles "Everything" should be selected',
+                    {
+                        position: toast.POSITION.TOP_RIGHT,
+                    }
+                )
+            }
+        }, 1000)
+    }
+
     return (
         <Container className="p-8">
             <h1 className="text-center pb-8">My News App</h1>
@@ -36,20 +82,22 @@ function App() {
                         <Select
                             placeholder="Select Category"
                             options={newsCategory}
-                            onChange={handleCountryChange}
+                            onChange={handleSearchCategory}
+                            value={category}
                         />
                     </Grid.Column>
                     <Grid.Column>
                         <Input
+                            fluid
                             icon="search"
                             placeholder="Search..."
-                            className="w-full"
+                            onChange={handleSearchInput}
                         />
                     </Grid.Column>
                 </Grid.Row>
                 <SearchResultsMessage articles={articles} />
-                {articles.map(article => (
-                    <Article {...article} />
+                {articles.map((article, index) => (
+                    <Article key={index} {...article} />
                 ))}
             </Grid>
         </Container>

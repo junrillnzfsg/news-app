@@ -6,6 +6,7 @@ interface OwnProps {
     placeholder: string
     options: SelectData[]
     onChange: (e: SyntheticEvent, formValue: DropdownProps) => void
+    value?: string
 }
 
 type Props = OwnProps
@@ -16,8 +17,10 @@ const Select: FunctionComponent<Props> = props => (
         fluid
         search
         selection
+        inverted
         options={props.options}
         onChange={props.onChange}
+        value={props.value}
     />
 )
 

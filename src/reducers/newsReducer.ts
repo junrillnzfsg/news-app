@@ -3,7 +3,7 @@ import ApiResponseModel from '../model/ApiResponseModel'
 import ArticleModel from '../model/ArticleModel'
 import { AppThunk } from '../store'
 
-import { getTopHeadlines } from '../api/newsAPI'
+import { getTopHeadlines, searchEverything } from '../api/newsAPI'
 
 type CurrentNewsState = {
     articles: ArticleModel[]
@@ -48,6 +48,17 @@ export const fetchTopHeadlines = (
 ): AppThunk => async dispatch => {
     try {
         const data = await getTopHeadlines(country)
+        dispatch(getNewsSuccess(data))
+    } catch (err) {
+        dispatch(getNewsError(err.toString()))
+    }
+}
+
+export const fetchSearchEverything = (
+    query: string
+): AppThunk => async dispatch => {
+    try {
+        const data = await searchEverything(query)
         dispatch(getNewsSuccess(data))
     } catch (err) {
         dispatch(getNewsError(err.toString()))
