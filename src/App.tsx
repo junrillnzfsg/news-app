@@ -68,7 +68,9 @@ function App() {
 
     return (
         <Container className="p-8">
-            <h1 className="text-center pb-8">My News App</h1>
+            <h1 className="text-center pb-8">
+                <a href="/">My News App</a>
+            </h1>
             <Grid>
                 <Grid.Row columns={3}>
                     <Grid.Column>

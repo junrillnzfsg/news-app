@@ -17,7 +17,6 @@ const Select: FunctionComponent<Props> = props => (
         fluid
         search
         selection
-        inverted
         options={props.options}
         onChange={props.onChange}
         value={props.value}
